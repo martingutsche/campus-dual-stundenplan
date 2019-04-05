@@ -1,17 +1,20 @@
 <resources>
+    <!-- GENERAL -->
     <string name="app_name">Campus Dual Stundenplan</string>
-    <string name="userdata_path">userdata.json</string>
-    <string name="title_activity_login">Sign in</string>
-    <!-- Strings related to login -->
-    <string name="prompt_email">Email</string>
-    <string name="prompt_password">Password (optional)</string>
-    <string name="action_sign_in">Sign in or register</string>
-    <string name="action_sign_in_short">Sign in</string>
-    <string name="error_invalid_email">This email address is invalid</string>
-    <string name="error_invalid_password">This password is too short</string>
-    <string name="error_incorrect_password">This password is incorrect</string>
-    <string name="error_field_required">This field is required</string>
-    <string name="permission_rationale">"Contacts permissions are needed for providing email
-        completions."
-    </string>
+    <string name="login_data_path">login_data.json</string>
+    <string name="useragent">Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36</string>
+    <string name="gscope">https://www.googleapis.com/auth/calendar</string>
+
+    <!-- LOGIN -->
+    <string name="login_progress_bar_msg">Anmelden…</string>
+    <string name="login_name">Matrikelnummer</string>
+    <string name="login_password">Passwort</string>
+    <string name="login_btn">Login</string>
+    <string name="login_hint">Einmal einloggen und deinen Stundenplan immer dabei haben</string>
+
+    <string name="error_empty_password">Bitte Passwort eingeben</string>
+    <string name="error_empty_matrikelnummer">Bitte Matrikelnummer eingeben</string>
+    <string name="login_failed">Login fehlgeschalgen</string>
+
+    <!-- MAIN -->
 </resources>
