@@ -6,7 +6,7 @@ android {
         applicationId "de.martin_gutsche.campusdualstundenplan"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
+        versionCode 101
         versionName
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -27,9 +27,15 @@ android {
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
     }
+
 }
 
 dependencies {
+    configurations {
+        all {
+            exclude module: 'httpclient'
+        }
+    }
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0-alpha04'
     implementation 'androidx.media:media:1.1.0-alpha04'
@@ -47,8 +53,6 @@ dependencies {
     implementation 'com.google.api-client:google-api-client:1.25.0'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.23.0'
     implementation 'com.google.apis:google-api-services-calendar:v3-rev305-1.23.0'
-    api('com.google.api-client:google-api-client-android:1.23.0') {
-        exclude group: 'org.apache.httpcomponents'
-    }
+    implementation 'com.google.api-client:google-api-client-android:1.23.0'
     implementation 'com.google.guava:guava:27.0.1-android'
 }
