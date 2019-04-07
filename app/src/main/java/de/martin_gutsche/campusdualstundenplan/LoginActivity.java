@@ -139,6 +139,8 @@ public class LoginActivity extends AppCompatActivity {
                     activity.finish();
                 } else {
                     activity.findViewById(R.id.btn_login).setEnabled(true);
+                    activity.findViewById(R.id.input_matrikel_rr).setEnabled(true);
+                    activity.findViewById(R.id.input_password).setEnabled(true);
                     Toast.makeText(
                             activity.getBaseContext(),
                             activity.getString(R.string.login_failed),
