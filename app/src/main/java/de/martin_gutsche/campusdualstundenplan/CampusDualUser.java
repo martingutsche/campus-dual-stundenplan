@@ -125,9 +125,9 @@ class CampusDualUser {
         String[][] params = new String[hiddenInputs.size() + 2][2];
         //[hiddenInputs.size()+username+password][key+value]
         params[0][0] = "sap-user";
-        params[0][1] = URLEncoder.encode(username, "UTF-8");
+        params[0][1] = username;
         params[1][0] = "sap-password";
-        params[1][1] = URLEncoder.encode(password, "UTF-8");
+        params[1][1] = password;
         { //don't want to use i in a larger scope
             int i = 2; //0==user; 1==password; 2<=hidden input
             for (Element input : hiddenInputs) {
