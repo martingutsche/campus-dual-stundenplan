@@ -1,14 +1,22 @@
 package de.martin_gutsche.campusdualstundenplan;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
-import org.json.JSONException;
-import org.json.JSONObject;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.TimeUnit;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,20 +30,35 @@ public class MainActivity extends AppCompatActivity {
             //Redirect to splashActivity
             startActivity(new Intent(this, SplashActivity.class));
         } else {
-            JSONObject loginData = Util.getLoginData(this);
 
-            CampusDualUser campusDualUser = null;
-            try {
-                String username = loginData.getString("username");
-                String hash = loginData.getString("hash");
-                campusDualUser = new CampusDualUser(username, hash);
-            } catch (JSONException e) {
-                //Redirect to splashActivity
-                startActivity(new Intent(this, SplashActivity.class));
+
+            ///////////////////////////////////////////////////////////
+            System.out.println(" ");
+            try (BufferedReader br = new BufferedReader(
+                    new InputStreamReader(
+                            openFileInput("test.txt")))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    System.out.println(line);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            System.out.println("  ");
+            ///////////////////////////////////////////////////////////
 
 
-            //TODO schedule work
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            PeriodicWorkRequest myWork =
+                    new PeriodicWorkRequest.Builder(CalendarWorker.class, 12, TimeUnit.HOURS)
+                            .setConstraints(constraints)
+                            .build();
+
+            WorkManager.getInstance()
+                    .enqueueUniquePeriodicWork("Calendar", ExistingPeriodicWorkPolicy.KEEP, myWork);
         }
     }
 }

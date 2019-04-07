@@ -1,8 +1,6 @@
 package de.martin_gutsche.campusdualstundenplan;
 
 import android.content.Context;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,11 +16,17 @@ import java.net.URLEncoder;
 
 import javax.net.ssl.HttpsURLConnection;
 
-public class Util {
+class Util {
+    // FILE OPERATIONS //
+    private static final String LOGIN_DATA_PATH = "login_data.json";
+    private static final String CALENDAR_JSON_PATH = "calendar.json";
+    private static final String CALENDAR_ID_PATH = "calendar_id.json";
+
+    // login data
     static JSONObject getLoginData(Context context) {
         try (BufferedReader br = new BufferedReader(
                 new InputStreamReader(
-                        context.openFileInput(context.getString(R.string.login_data_path))))) {
+                        context.openFileInput(LOGIN_DATA_PATH)))) {
             StringBuilder sb = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
@@ -42,19 +46,70 @@ public class Util {
             JSONObject json = new JSONObject();
             json.put("username", username);
             json.put("hash", hash);
-            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(context.openFileOutput(context.getString(R.string.login_data_path), Context.MODE_PRIVATE));
-            outputStreamWriter.write(json.toString());
-            outputStreamWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            writeToInternal(LOGIN_DATA_PATH, json.toString(), context);
         } catch (JSONException e) {
             e.printStackTrace();
         }
     }
 
-    ////////////////////////////
-    ///  Network Operations  ///
-    ////////////////////////////
+    // calendar id
+    static String getCalendarString(Context context) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                        context.openFileInput(CALENDAR_JSON_PATH)))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static void saveCalendarString(String calendarString, Context context) {
+        writeToInternal(CALENDAR_JSON_PATH, calendarString, context);
+    }
+
+    // calendar string
+    static String getCalendarId(Context context) {
+        try (BufferedReader br = new BufferedReader(
+                new InputStreamReader(
+                        context.openFileInput(CALENDAR_ID_PATH)))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = br.readLine()) != null) {
+                sb.append(line);
+            }
+            return sb.toString();
+        } catch (FileNotFoundException e) {
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    static void saveCalendarId(String calendarId, Context context) {
+        writeToInternal(CALENDAR_ID_PATH, calendarId, context);
+    }
+
+    // helper
+    private static void writeToInternal(String path, String data, Context context) {
+        try (OutputStreamWriter outputStreamWriter = new OutputStreamWriter(
+                context.openFileOutput(path, Context.MODE_PRIVATE))) {
+            outputStreamWriter.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // NETWORK OPERATIONS //
     static String HttpGet(String urlString, String[][] params, String useragent) throws IOException {
         //convert params from HashMap to String formatted to be used in a request
         String paramsString = ParamsToString(params);
@@ -108,9 +163,10 @@ public class Util {
             }
 
             try {
-                paramsStringBuilder.append(
-                        URLEncoder.encode(params[i][0], "UTF-8") + "=" +
-                                URLEncoder.encode(params[i][1], "UTF-8"));
+                paramsStringBuilder
+                        .append(URLEncoder.encode(params[i][0], "UTF-8"))
+                        .append("=")
+                        .append(URLEncoder.encode(params[i][1], "UTF-8"));
             } catch (UnsupportedEncodingException e) {
                 // this should never happen the encoding is not
                 // a variable and UTF-8 should be supported
@@ -124,18 +180,13 @@ public class Util {
         String line;
         try (BufferedReader br = new BufferedReader(in)) {
             while ((line = br.readLine()) != null) {
-                responseBuilder.append(line + "\n");
+                responseBuilder
+                        .append(line)
+                        .append("\n");
             }
         } catch (IOException e) {
             //no special directory is accessed, so no problem here
         }
         return responseBuilder.toString();
-    }
-
-    private boolean isNetworkAvailable(Context context) {
-        ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetworkInfo = connectivityManager
-                .getActiveNetworkInfo();
-        return activeNetworkInfo != null;
     }
 }

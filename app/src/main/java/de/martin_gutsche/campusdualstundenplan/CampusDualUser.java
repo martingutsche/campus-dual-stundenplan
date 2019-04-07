@@ -1,5 +1,6 @@
 package de.martin_gutsche.campusdualstundenplan;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 
 import org.json.JSONArray;
@@ -11,6 +12,8 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
 import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
@@ -20,7 +23,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.Locale;
 
 import javax.net.ssl.HostnameVerifier;
@@ -33,11 +35,11 @@ import javax.net.ssl.X509TrustManager;
 import static de.martin_gutsche.campusdualstundenplan.Util.HttpGet;
 import static de.martin_gutsche.campusdualstundenplan.Util.HttpPost;
 
-public class CampusDualUser {
+class CampusDualUser {
     private static final String ERP_URL = "https://erp.campus-dual.de";
     private static final String SS_URL = "https://selfservice.campus-dual.de";
+    private final String username;
     private String hash;
-    private String username;
 
     /**
      * Constructor if user needs to be logged in.
@@ -49,13 +51,19 @@ public class CampusDualUser {
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
+
+        // a CookieManager is necessary for the login..
+        // without one campus dual doesn't recognise us when we want to get the hash
+        CookieManager manager = new CookieManager();
+        CookieHandler.setDefault(manager);
+
         login(password, context);
     }
 
     /**
      * Constructor if user already has his hash and doesn't need to be logged in.
      */
-    public CampusDualUser(String username, String hash) {
+    CampusDualUser(String username, String hash) {
         this.username = username;
         this.hash = hash;
         try {
@@ -63,12 +71,10 @@ public class CampusDualUser {
         } catch (KeyManagementException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-//        CookieManager manager = new CookieManager(); TODO: remove if everything works
-//        CookieHandler.setDefault(manager);
     }
 
     /**
-     * This Method is sadly needed, as the server doesn't send the complete CA chain on connection
+     * This Method is sadly needed, as the server doesn't send the complete CA chain
      */
     private void allowAllCerts() throws KeyManagementException, NoSuchAlgorithmException {
         TrustManager[] trustAllCerts = new TrustManager[]{
@@ -77,10 +83,12 @@ public class CampusDualUser {
                         return new X509Certificate[0];
                     }
 
+                    @SuppressLint("TrustAllX509TrustManager")
                     @Override
                     public void checkClientTrusted(X509Certificate[] certs, String authType) {
                     }
 
+                    @SuppressLint("TrustAllX509TrustManager")
                     @Override
                     public void checkServerTrusted(X509Certificate[] certs, String authType) {
                     }
@@ -91,6 +99,7 @@ public class CampusDualUser {
         sc.init(null, trustAllCerts, new SecureRandom());
         HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
         HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
+            @SuppressLint("BadHostnameVerifier")
             @Override
             public boolean verify(String arg0, SSLSession arg1) {
                 return true;
@@ -114,7 +123,7 @@ public class CampusDualUser {
 
         //login request
         String[][] params = new String[hiddenInputs.size() + 2][2];
-                                    //[hiddenInputs.size()+username+password][key+value]
+        //[hiddenInputs.size()+username+password][key+value]
         params[0][0] = "sap-user";
         params[0][1] = URLEncoder.encode(username, "UTF-8");
         params[1][0] = "sap-password";
@@ -136,22 +145,30 @@ public class CampusDualUser {
                 SS_URL + "/index/login",
                 null,
                 context.getString(R.string.useragent));
+
         int index = mainResponse.indexOf(" hash=\""); // needs whitespace to match just one result
-        hash = mainResponse.substring(index + 7, index + 7 + 32);
-        Util.saveLoginData(username, hash, context);
+        if (index != -1) {
+            hash = mainResponse.substring(index + 7, index + 7 + 32);
+            Util.saveLoginData(username, hash, context);
+        } else {
+            throw new RuntimeException(
+                    "No hash was included in the Response -> login data is probably wrong");
+        }
+
     }
 
-    public JSONArray getNextSemester(Context context)
-            throws IOException, JSONException, ParseException {
+    JSONArray getNextSemester(Context context)
+            throws IOException {
         long currentTime = System.currentTimeMillis();
-        long start = getNextSemesterStart(context);
-        long end = (currentTime / 1000) + (60 * 60 * 24 * 31 * 4); //current + 4 months
+        // the times didn't matter at 05.04.2019 so times set are preemptive
+        long start = currentTime / 1000;
+        long end = (currentTime / 1000) + (60 * 60 * 24 * 31 * 6); //current + 6 months
         String[][] params = {
-                {"_", "" + (currentTime - currentTime % (1000 * 60 * 60 * 24))},
+                {"userid", username},
+                {"hash", hash},
                 {"start", "" + start},
                 {"end", "" + end},
-                {"hash", hash},
-                {"userid", username}
+                {"_", "" + currentTime}
         };
         String responseString = HttpGet(SS_URL + "/room/json", params, context.getString(R.string.useragent));
 
@@ -166,7 +183,7 @@ public class CampusDualUser {
         return responseJSON;
     }
 
-    private long getNextSemesterStart(Context context) throws IOException, JSONException, ParseException {
+    long getCurrentSemesterStart(Context context) throws IOException, JSONException, ParseException {
         long semesterStart;
         String[][] params = {
                 {"user", username}
@@ -177,20 +194,23 @@ public class CampusDualUser {
         JSONArray events = response.getJSONArray("events");
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-        Calendar cal = new GregorianCalendar(2100, 1, 1, 0, 0, 0); //no user should have earlier semesters
+        Calendar cal = Calendar.getInstance();
         for (int i = 0; i < events.length(); i++) {
             JSONObject event = events.getJSONObject(i);
             if (event.getString("title").equals("Theorie")) {
                 Date eventStart = sdf.parse(event.getString("start"));
                 Date eventEnd = sdf.parse(event.getString("end"));
+                Calendar end = Calendar.getInstance();
+                end.setTime(eventEnd);
 
-                if (cal.after(eventStart) && Calendar.getInstance().before(eventEnd)) {
+                if (cal.before(end)) {
                     cal.setTime(eventStart);
+                    break;
                 }
             }
         }
         semesterStart = cal.getTimeInMillis();
 
-        return semesterStart;
+        return semesterStart / 1000;
     }
 }

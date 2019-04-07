@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:fitsSystemWindows="true">
@@ -12,39 +13,28 @@
         android:paddingLeft="24dp"
         android:paddingRight="24dp">
 
-        <ImageView android:src="@drawable/logo"
-            android:layout_width="wrap_content"
-            android:layout_height="72dp"
-            android:layout_marginBottom="24dp"
-            android:layout_gravity="center_horizontal" />
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="60dp" />
 
         <!-- Email Label -->
-        <android.support.design.widget.TextInputLayout
+        <EditText
+            android:id="@+id/input_matrikel_rr"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/intput_matrikel_rr"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textEmailAddress"
-                android:hint="@string/login_name" />
-        </android.support.design.widget.TextInputLayout>
+            android:inputType="textEmailAddress"
+            android:hint="@string/login_name"
+            tools:ignore="Autofill" />
 
         <!-- Password Label -->
-        <android.support.design.widget.TextInputLayout
+        <EditText android:id="@+id/input_password"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
-            <EditText android:id="@+id/input_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="textPassword"
-                android:hint="@string/login_password"/>
-        </android.support.design.widget.TextInputLayout>
+            android:inputType="textPassword"
+            android:hint="@string/login_password"
+            tools:ignore="Autofill" />
 
-        <android.support.v7.widget.AppCompatButton
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_login"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
@@ -53,7 +43,7 @@
             android:padding="12dp"
             android:text="@string/login_btn"/>
 
-        <TextView android:id="@+id/link_signup"
+        <TextView android:id="@+id/link_sign_up"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="24dp"

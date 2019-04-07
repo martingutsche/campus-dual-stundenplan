@@ -1,6 +1,5 @@
 <resources>
-
-    <!-- Base application theme. -->
+    <!-- Used in main activity -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -8,7 +7,10 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Used in splash and login activity -->
     <style name="AppTheme.Dark" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowAnimationStyle">@null</item>
+
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
 
@@ -24,13 +26,5 @@
         <item name="android:textColorHint">@color/iron</item>
 
         <item name="colorButtonNormal">@color/colorPrimaryDarker</item>
-        <item name="android:colorButtonNormal">@color/colorPrimaryDarker</item>
     </style>
-
-    <style name="AppTheme.Dark.Dialog" parent="Theme.AppCompat.Dialog">
-        <item name="colorAccent">@color/white</item>
-        <item name="android:textColorPrimary">@color/iron</item>
-        <item name="android:background">@color/colorPrimary</item>
-    </style>
-
 </resources>
