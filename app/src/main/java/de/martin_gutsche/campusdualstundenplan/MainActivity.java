@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
                                     }
                                 } else if (workInfos.get(0).getState() == WorkInfo.State.RUNNING) {
                                     msg = "Aktualisierung wird gestartet";
+                                } else if (workInfos.get(0).getState() == WorkInfo.State.FAILED) {
+                                    msg = "Aktualisierung war fehlerhaft und wird später wiederholt";
                                 }
                                 lastState = workInfos.get(0).getState();
                                 Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG).show();

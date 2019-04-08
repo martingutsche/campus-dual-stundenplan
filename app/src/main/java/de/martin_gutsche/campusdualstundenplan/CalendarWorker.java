@@ -35,7 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-class CalendarWorker extends Worker {
+public class CalendarWorker extends Worker {
     private static final GenericUrl BATCH_URL = new GenericUrl("https://www.googleapis.com/batch/calendar/v3");
     private static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
