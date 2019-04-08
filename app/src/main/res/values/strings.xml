@@ -15,7 +15,7 @@
 
     <!-- MAIN -->
     <string name="main_text">
-        Campus Dual Stundenplan aktualisiert deinen Stundenplan von jetzt an jeden Tag automatisch. Du musst dich also um nichts mehr kümmern.\n\n\n
+        Campus Dual Stundenplan aktualisiert deinen Stundenplan von jetzt an jeden Tag automatisch. Falls du deine Module noch nicht im Google Kalender siehst, aktualisiere diesen bitte in der Google Kalender App (Drei Punkte oben rechts).\n\n\n
         Um die nächste Stunde direkt auf dem Homescreen zu sehen kannst du das Terminübersicht Widget vom Google Kalender nutzen.
     </string>
 </resources>
