@@ -59,7 +59,7 @@ public class MainActivity extends AppCompatActivity {
                                         msg = "Aktualisierung abgeschlossen";
                                     }
                                 } else if (workInfos.get(0).getState() == WorkInfo.State.RUNNING) {
-                                    msg = "Aktualisierung wird gestartet... Dauer bis zu 30 Sekunden";
+                                    msg = "Aktualisierung wird gestartet... Dies kann bis zu 30 Sekunden dauern";
                                 } else if (workInfos.get(0).getState() == WorkInfo.State.FAILED) {
                                     msg = "Aktualisierung war fehlerhaft und wird später wiederholt";
                                 }
