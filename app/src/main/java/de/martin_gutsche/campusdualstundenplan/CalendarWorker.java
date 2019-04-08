@@ -53,7 +53,21 @@ public class CalendarWorker extends Worker {
 
         /// TITLE ///
         String title;
-        title = cdEvent.getString("title");
+        String cdInst = cdEvent.getString("instructor");
+        String cdSinst = cdEvent.getString("sinstructor");
+        String cdTitle = cdEvent.getString("title");
+        if(cdTitle.contains("-")) {
+            title = cdTitle.split("-",2)[1];
+        } else {
+            title = cdTitle;
+        }
+        if(!cdInst.equals("") || !cdSinst.equals("")) {
+            if (cdSinst.equals("") || cdInst.equals(cdSinst)) {
+                title += " (" + cdInst + ")";
+            } else {
+                title += " (" + cdInst + ", " + cdSinst + ")";
+            }
+        }
 
         ///  ROOM  ///
         String room;
@@ -68,10 +82,7 @@ public class CalendarWorker extends Worker {
         ///  DESC  ///
         StringBuilder desc = new StringBuilder();
         String cdDesc = cdEvent.getString("description");
-        String cdInst = cdEvent.getString("instructor");
-        String cdSinst = cdEvent.getString("sinstructor");
         String cdRemarks = cdEvent.getString("remarks");
-
         //add description and remarks
         if (cdDesc.equals(cdRemarks)) {
             desc.append(cdDesc);
@@ -86,25 +97,6 @@ public class CalendarWorker extends Worker {
                 desc.append(cdRemarks);
             }
         }
-        //add separator if no desc or remarks were added
-        if (!desc.toString().equals("")) {
-            desc.append(" | ");
-        }
-        //add instructor(s)
-        if (cdInst.equals(cdSinst)) {
-            desc.append(cdInst);
-        } else {
-            if (!cdInst.equals("") && !cdSinst.equals("")) {
-                desc.append(cdInst);
-                desc.append("; ");
-                desc.append(cdSinst);
-            } else {
-                //ele is only reached when cdDesk or cd cdRemarks is empty (non-exclusive)
-                desc.append(cdInst);
-                desc.append(cdInst);
-            }
-        }
-
 
         ///  START & END  ///
         String startTime = cdEvent.getString("start");
