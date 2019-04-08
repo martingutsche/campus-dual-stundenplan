@@ -6,7 +6,7 @@ android {
         applicationId "de.martin_gutsche.campusdualstundenplan"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 112
+        versionCode 113
         versionName
         multiDexEnabled true
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"

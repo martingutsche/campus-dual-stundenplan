@@ -43,14 +43,14 @@ public class MainActivity extends AppCompatActivity {
             WorkManager.getInstance()
                     .enqueueUniquePeriodicWork("CampusDualCalendarSync", ExistingPeriodicWorkPolicy.REPLACE, myWork);
 
-            WorkManager.getInstance().getWorkInfosForUniqueWorkLiveData("Calendar")
+            WorkManager.getInstance().getWorkInfosForUniqueWorkLiveData("CampusDualCalendarSync")
                     .observe(this, new Observer<List<WorkInfo>>() {
 
                         private WorkInfo.State lastState;
 
                         @Override
                         public void onChanged(List<WorkInfo> workInfos) {
-                            if (workInfos.get(0) != null) {
+                            if (!workInfos.isEmpty() && workInfos.get(0) != null) {
                                 String msg = "Aktualisierungsauftrag ist in einem fehlerhaften Status: " + workInfos.get(0).getState().toString();
                                 if (workInfos.get(0).getState() == WorkInfo.State.ENQUEUED) {
                                     if (lastState != WorkInfo.State.RUNNING) {
