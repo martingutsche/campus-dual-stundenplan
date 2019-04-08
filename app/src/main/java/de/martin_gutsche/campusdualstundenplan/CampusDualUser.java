@@ -14,7 +14,6 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
-import java.net.URLEncoder;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -117,7 +116,7 @@ class CampusDualUser {
                 "&sap-language=de" +
                 "&uri=https://selfservice.campus-dual.de/index/login";
 
-        String initResponse = HttpGet(initUrl, null, context.getString(R.string.useragent));
+        String initResponse = HttpGet(initUrl, null);
         Document initPage = Jsoup.parse(initResponse);
         Elements hiddenInputs = initPage.select("#SL__FORM > input[type=hidden]");
 
@@ -138,13 +137,12 @@ class CampusDualUser {
             }
         }
         String loginUrl = ERP_URL + initPage.select("#SL__FORM").attr("action");
-        HttpPost(loginUrl, params, context.getString(R.string.useragent));
+        HttpPost(loginUrl, params);
 
         //Request of the main Page to get the hash needed to get a json calendar
         String mainResponse = HttpGet(
                 SS_URL + "/index/login",
-                null,
-                context.getString(R.string.useragent));
+                null);
 
         int index = mainResponse.indexOf(" hash=\""); // needs whitespace to match just one result
         if (index != -1) {
@@ -157,12 +155,12 @@ class CampusDualUser {
 
     }
 
-    JSONArray getNextSemester(Context context)
-            throws IOException {
+    JSONArray getNextSemester()
+            throws IOException, JSONException, ParseException {
         long currentTime = System.currentTimeMillis();
         // the times didn't matter at 05.04.2019 so times set are preemptive
-        long start = currentTime / 1000;
-        long end = (currentTime / 1000) + (60 * 60 * 24 * 31 * 6); //current + 6 months
+        long start = getCurrentSemesterStart();
+        long end = getCurrentSemesterStart() + (60 * 60 * 24 * 31 * 6); //currentSem + 6 months
         String[][] params = {
                 {"userid", username},
                 {"hash", hash},
@@ -170,7 +168,7 @@ class CampusDualUser {
                 {"end", "" + end},
                 {"_", "" + currentTime}
         };
-        String responseString = HttpGet(SS_URL + "/room/json", params, context.getString(R.string.useragent));
+        String responseString = HttpGet(SS_URL + "/room/json", params);
 
         JSONArray responseJSON = null;
         try {
@@ -183,12 +181,12 @@ class CampusDualUser {
         return responseJSON;
     }
 
-    long getCurrentSemesterStart(Context context) throws IOException, JSONException, ParseException {
+    long getCurrentSemesterStart() throws IOException, JSONException, ParseException {
         long semesterStart;
         String[][] params = {
                 {"user", username}
         };
-        String responseString = HttpGet(SS_URL + "/dash/gettimeline", params, context.getString(R.string.useragent));
+        String responseString = HttpGet(SS_URL + "/dash/gettimeline", params);
 
         JSONObject response = new JSONObject(responseString);
         JSONArray events = response.getJSONArray("events");

@@ -157,9 +157,9 @@ class CalendarWorker extends Worker {
         }
         //freshCal
         try {
-            freshCal = campusDualUser.getNextSemester(getApplicationContext());
+            freshCal = campusDualUser.getNextSemester();
             Util.saveCalendarString(freshCal.toString(), getApplicationContext());
-        } catch (IOException e) {
+        } catch (IOException | JSONException | ParseException e) {
             e.printStackTrace();
             return Result.failure();
         }
@@ -192,7 +192,7 @@ class CalendarWorker extends Worker {
             }
 
             try {
-                long currentSemesterStart = campusDualUser.getCurrentSemesterStart(getApplicationContext());
+                long currentSemesterStart = campusDualUser.getCurrentSemesterStart();
                 service.calendars().delete(calendarId).execute();
                 com.google.api.services.calendar.model.Calendar createdCalendar = createCalendar(service);
                 calendarId = createdCalendar.getId();

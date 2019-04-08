@@ -21,7 +21,11 @@ class Util {
     private static final String LOGIN_DATA_PATH = "login_data.json";
     private static final String CALENDAR_JSON_PATH = "calendar.json";
     private static final String CALENDAR_ID_PATH = "calendar_id.json";
+    // NETWORK OPERATIONS //
+    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36";
 
+
+    // FILE OPERATIONS //
     // login data
     static JSONObject getLoginData(Context context) {
         try (BufferedReader br = new BufferedReader(
@@ -109,8 +113,8 @@ class Util {
     }
 
 
-    // NETWORK OPERATIONS //
-    static String HttpGet(String urlString, String[][] params, String useragent) throws IOException {
+    // FILE OPERATIONS //
+    static String HttpGet(String urlString, String[][] params) throws IOException {
         //convert params from HashMap to String formatted to be used in a request
         String paramsString = ParamsToString(params);
         if (!paramsString.equals("")) {
@@ -120,7 +124,7 @@ class Util {
         //Make the actual connection
         URL url = new URL(urlString + paramsString);
         HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("User-Agent", useragent);
+        urlConnection.setRequestProperty("User-Agent", USER_AGENT);
 
         //get and return inputStream (converted to a String)
         String responseString = getResponseString(new InputStreamReader(urlConnection.getInputStream()));
@@ -128,14 +132,14 @@ class Util {
         return responseString;
     }
 
-    static String HttpPost(String urlString, String[][] params, String useragent) throws IOException {
+    static String HttpPost(String urlString, String[][] params) throws IOException {
         //convert params from HashMap to String formatted to be used in a request
         String paramsString = ParamsToString(params);
 
         //Make the actual connection
         URL url = new URL(urlString);
         HttpsURLConnection urlConnection = (HttpsURLConnection) url.openConnection();
-        urlConnection.setRequestProperty("User-Agent", useragent);
+        urlConnection.setRequestProperty("User-Agent", USER_AGENT);
         urlConnection.setDoOutput(true);
         urlConnection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
         urlConnection.setRequestProperty("Content-Length", String.valueOf(paramsString.length()));
