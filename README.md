@@ -1,3 +1,1 @@
 # Campus Dual Stundenplan
-
-**PASSWORDS WERE COMMITED HERE... DO NOT SHARE THIS REPO**
