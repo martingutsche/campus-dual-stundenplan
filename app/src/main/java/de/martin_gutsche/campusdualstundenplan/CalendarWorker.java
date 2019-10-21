@@ -2,6 +2,10 @@ package de.martin_gutsche.campusdualstundenplan;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+import androidx.work.Worker;
+import androidx.work.WorkerParameters;
+
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.api.client.extensions.android.http.AndroidHttp;
@@ -31,14 +35,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
-import androidx.annotation.NonNull;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
-
 public class CalendarWorker extends Worker {
     private static final GenericUrl BATCH_URL = new GenericUrl("https://www.googleapis.com/batch/calendar/v3");
     private static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
+    private static final SimpleDateFormat cdDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.GERMAN);
 
     private Calendar service;
     private String calendarId;
@@ -49,8 +50,6 @@ public class CalendarWorker extends Worker {
     }
 
     private static Event convertEventToGoogle(JSONObject cdEvent) throws JSONException, ParseException {
-        SimpleDateFormat cdDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.GERMAN);
-
         /// TITLE ///
         String title;
         String cdInst = cdEvent.getString("instructor");
@@ -151,7 +150,7 @@ public class CalendarWorker extends Worker {
         try {
             freshCal = campusDualUser.getNextSemester();
             Util.saveCalendarString(freshCal.toString(), getApplicationContext());
-        } catch (IOException | JSONException | ParseException e) {
+        } catch (IOException e) {
             e.printStackTrace();
             return Result.failure();
         }
@@ -174,9 +173,12 @@ public class CalendarWorker extends Worker {
         ////  COMPARE THE TWO CALENDARS AND REMOVE AND READD ALL EVENTS IF NECESSARY  ////
         if (!freshCal.toString().equals(storedCal.toString())) {
             List<Event> events = new ArrayList<>();
+            long currentSemesterStart = campusDualUser.getCurrentSemesterStart();
             for (int i = 0; i < freshCal.length(); i++) {
                 try {
-                    events.add(convertEventToGoogle(freshCal.getJSONObject(i)));
+                    if (new DateTime(cdDateFormat.parse(freshCal.getJSONObject(i).getString("end"))).getValue() > currentSemesterStart * 1000) {
+                        events.add(convertEventToGoogle(freshCal.getJSONObject(i)));
+                    }
                 } catch (JSONException | ParseException e) {
                     e.printStackTrace();
                     return Result.failure();
@@ -184,12 +186,11 @@ public class CalendarWorker extends Worker {
             }
 
             try {
-                long currentSemesterStart = campusDualUser.getCurrentSemesterStart();
                 service.calendars().delete(calendarId).execute();
                 com.google.api.services.calendar.model.Calendar createdCalendar = createCalendar(service);
                 calendarId = createdCalendar.getId();
-                addEvents(events, currentSemesterStart);
-            } catch (IOException | JSONException | ParseException e) {
+                addEvents(events);
+            } catch (IOException e) {
                 e.printStackTrace();
                 return Result.failure();
             }
@@ -232,25 +233,26 @@ public class CalendarWorker extends Worker {
         return createdCalendar;
     }
 
-    private void addEvents(List<Event> events, long currentSemesterStart) throws IOException {
-        BatchRequest batch = service.batch();
-        batch.setBatchUrl(BATCH_URL);
-        for (Event event : events) {
-            if (event.getStart().getDateTime().getValue() > currentSemesterStart * 1000) {
-                service.events().insert(calendarId, event).queue(batch,
-                        new JsonBatchCallback<Event>() {
-                            @Override
-                            public void onSuccess(Event event, HttpHeaders responseHeaders) {
-                            }
+    private void addEvents(List<Event> events) throws IOException {
+        if (events.size() > 0) {
+            for (int i = 0; i < Math.ceil(events.size() / 50); i++) {
+                BatchRequest batch = service.batch();
+                batch.setBatchUrl(BATCH_URL);
+                for (Event event : events.subList(i * 50, (i + 1) * 50)) {
+                    service.events().insert(calendarId, event).queue(batch,
+                            new JsonBatchCallback<Event>() {
+                                @Override
+                                public void onSuccess(Event event, HttpHeaders responseHeaders) {
+                                }
 
-                            @Override
-                            public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
-                                System.out.println(e.getErrors());
-                            }
-                        });
+                                @Override
+                                public void onFailure(GoogleJsonError e, HttpHeaders responseHeaders) {
+                                    System.out.println(e.getErrors());
+                                }
+                            });
+                }
+                batch.execute();
             }
         }
-        batch.execute();
     }
-
 }
