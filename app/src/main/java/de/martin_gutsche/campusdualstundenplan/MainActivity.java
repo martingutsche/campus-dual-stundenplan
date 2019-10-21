@@ -36,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                     .build();
 
             PeriodicWorkRequest myWork =
-                    new PeriodicWorkRequest.Builder(CalendarWorker.class, 20, TimeUnit.MINUTES)
+                    new PeriodicWorkRequest.Builder(CalendarWorker.class, 6 * 60, TimeUnit.MINUTES)
                             .setConstraints(constraints)
                             .build();
 
