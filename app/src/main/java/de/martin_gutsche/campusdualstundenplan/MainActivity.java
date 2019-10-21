@@ -4,12 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.work.Constraints;
@@ -18,6 +12,12 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,10 +40,10 @@ public class MainActivity extends AppCompatActivity {
                             .setConstraints(constraints)
                             .build();
 
-            WorkManager.getInstance()
-                    .enqueueUniquePeriodicWork("CampusDualCalendarSync", ExistingPeriodicWorkPolicy.REPLACE, myWork);
+            WorkManager.getInstance(this)
+                    .enqueueUniquePeriodicWork("CampusDualCalendarSync", ExistingPeriodicWorkPolicy.KEEP, myWork);
 
-            WorkManager.getInstance().getWorkInfosForUniqueWorkLiveData("CampusDualCalendarSync")
+            WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData("CampusDualCalendarSync")
                     .observe(this, new Observer<List<WorkInfo>>() {
 
                         private WorkInfo.State lastState;
