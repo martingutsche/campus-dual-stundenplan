@@ -14,9 +14,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.lang.ref.WeakReference;
-
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.lang.ref.WeakReference;
 
 public class LoginActivity extends AppCompatActivity {
     private EditText inputMatrikelNr;
@@ -56,6 +56,11 @@ public class LoginActivity extends AppCompatActivity {
 
         String matrikelnummer = inputMatrikelNr.getText().toString();
         String password = inputPassword.getText().toString();
+
+        if (matrikelnummer.substring(0, 1).equals("s")) {
+            matrikelnummer = matrikelnummer.substring(1);
+        }
+
 
         boolean cancel = false;
         View focusView = null;
