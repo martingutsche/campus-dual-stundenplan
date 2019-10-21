@@ -156,7 +156,7 @@ class CampusDualUser {
     }
 
     JSONArray getNextSemester()
-            throws IOException, JSONException, ParseException {
+            throws IOException {
         long currentTime = System.currentTimeMillis();
         // the times didn't matter at 05.04.2019 so times set are preemptive
         long start = getCurrentSemesterStart();
@@ -181,34 +181,39 @@ class CampusDualUser {
         return responseJSON;
     }
 
-    long getCurrentSemesterStart() throws IOException, JSONException, ParseException {
-        long semesterStart;
-        String[][] params = {
-                {"user", username}
-        };
-        String responseString = HttpGet(SS_URL + "/dash/gettimeline", params);
+    long getCurrentSemesterStart() {
+        try {
+            long semesterStart;
+            String[][] params = {
+                    {"user", username}
+            };
+            String responseString = HttpGet(SS_URL + "/dash/gettimeline", params);
 
-        JSONObject response = new JSONObject(responseString);
-        JSONArray events = response.getJSONArray("events");
+            JSONObject response = new JSONObject(responseString);
+            JSONArray events = response.getJSONArray("events");
 
-        SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
-        Calendar cal = Calendar.getInstance();
-        for (int i = 0; i < events.length(); i++) {
-            JSONObject event = events.getJSONObject(i);
-            if (event.getString("title").equals("Theorie")) {
-                Date eventStart = sdf.parse(event.getString("start"));
-                Date eventEnd = sdf.parse(event.getString("end"));
-                Calendar end = Calendar.getInstance();
-                end.setTime(eventEnd);
+            SimpleDateFormat sdf = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH);
+            Calendar cal = Calendar.getInstance();
+            for (int i = 0; i < events.length(); i++) {
+                JSONObject event = events.getJSONObject(i);
+                if (event.getString("title").equals("Theorie")) {
+                    Date eventStart = sdf.parse(event.getString("start"));
+                    Date eventEnd = sdf.parse(event.getString("end"));
+                    Calendar end = Calendar.getInstance();
+                    end.setTime(eventEnd);
 
-                if (cal.before(end)) {
-                    cal.setTime(eventStart);
-                    break;
+                    if (cal.before(end)) {
+                        cal.setTime(eventStart);
+                        break;
+                    }
                 }
             }
-        }
-        semesterStart = cal.getTimeInMillis();
+            semesterStart = cal.getTimeInMillis();
 
-        return semesterStart / 1000;
+            return semesterStart / 1000;
+        } catch (ParseException | IOException | JSONException e) {
+            e.printStackTrace();
+            return 0;
+        }
     }
 }
