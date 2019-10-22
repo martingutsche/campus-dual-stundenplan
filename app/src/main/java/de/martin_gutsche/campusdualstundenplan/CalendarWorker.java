@@ -34,12 +34,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class CalendarWorker extends Worker {
     private static final GenericUrl BATCH_URL = new GenericUrl("https://www.googleapis.com/batch/calendar/v3");
     private static final HttpTransport HTTP_TRANSPORT = AndroidHttp.newCompatibleTransport();
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final SimpleDateFormat cdDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.GERMAN);
+
 
     private Calendar service;
     private String calendarId;
@@ -50,6 +52,8 @@ public class CalendarWorker extends Worker {
     }
 
     private static Event convertEventToGoogle(JSONObject cdEvent) throws JSONException, ParseException {
+        cdDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
+
         /// TITLE ///
         String title;
         String cdInst = cdEvent.getString("instructor");
@@ -111,6 +115,12 @@ public class CalendarWorker extends Worker {
                 .setTimeZone("Europe/Berlin");
 
 
+        System.out.println(cdDateFormat.parse(endTime));
+        System.out.println(endTime);
+        System.out.println(end);
+        System.out.println();
+
+
         ///  CREATE THE ACTUAL EVENT  ///
         return new Event()
                 .setSummary(title)
@@ -132,7 +142,7 @@ public class CalendarWorker extends Worker {
             campusDualUser = new CampusDualUser(username, hash);
         } catch (JSONException | NullPointerException e) {
             e.printStackTrace();
-            return Result.failure();
+            return Result.retry();
         }
 
         service = getService();
@@ -152,7 +162,7 @@ public class CalendarWorker extends Worker {
             Util.saveCalendarString(freshCal.toString(), getApplicationContext());
         } catch (IOException e) {
             e.printStackTrace();
-            return Result.failure();
+            return Result.retry();
         }
 
 
@@ -166,7 +176,7 @@ public class CalendarWorker extends Worker {
             } catch (NullPointerException e) {
                 // CalendarId was set before
                 e.printStackTrace();
-                return Result.failure();
+                return Result.retry();
             }
         }
 
@@ -181,7 +191,7 @@ public class CalendarWorker extends Worker {
                     }
                 } catch (JSONException | ParseException e) {
                     e.printStackTrace();
-                    return Result.failure();
+                    return Result.retry();
                 }
             }
 
@@ -192,7 +202,7 @@ public class CalendarWorker extends Worker {
                 addEvents(events);
             } catch (IOException e) {
                 e.printStackTrace();
-                return Result.failure();
+                return Result.retry();
             }
         }
         // Indicate whether the task finished successfully with the Result
