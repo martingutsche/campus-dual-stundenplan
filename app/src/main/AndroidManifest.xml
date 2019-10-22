@@ -18,8 +18,7 @@
         <!-- Login -->
         <activity
             android:name=".LoginActivity"
-            android:theme="@style/AppTheme.Dark">
-        </activity>
+            android:theme="@style/AppTheme.Dark"></activity>
 
         <!-- Splash -->
         <activity
@@ -36,12 +35,14 @@
         <activity android:name=".MainActivity">
             <intent-filter android:label="@string/app_name">
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Accepts URIs that begin with "http://www.example.com/gizmos” -->
-                <data android:scheme="http"
+                <data
                     android:host="www.martin-gutsche.de"
-                    android:pathPrefix="/campusdual" />
+                    android:pathPrefix="/campusdual"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
     </application>

@@ -59,12 +59,12 @@ public class CalendarWorker extends Worker {
         String cdInst = cdEvent.getString("instructor");
         String cdSinst = cdEvent.getString("sinstructor");
         String cdTitle = cdEvent.getString("title");
-        if(cdTitle.contains("-")) {
-            title = cdTitle.split("-",2)[1];
+        if (cdTitle.contains("-")) {
+            title = cdTitle.split("-", 2)[1];
         } else {
             title = cdTitle;
         }
-        if(!cdInst.equals("") || !cdSinst.equals("")) {
+        if (!cdInst.equals("") || !cdSinst.equals("")) {
             if (cdSinst.equals("") || cdInst.equals(cdSinst)) {
                 title += " (" + cdInst + ")";
             } else {
