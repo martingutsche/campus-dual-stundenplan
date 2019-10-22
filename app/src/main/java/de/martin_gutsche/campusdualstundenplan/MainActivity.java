@@ -6,6 +6,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
+import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
@@ -36,12 +37,13 @@ public class MainActivity extends AppCompatActivity {
                     .build();
 
             PeriodicWorkRequest myWork =
-                    new PeriodicWorkRequest.Builder(CalendarWorker.class, 6 * 60, TimeUnit.MINUTES)
+                    new PeriodicWorkRequest.Builder(CalendarWorker.class, 3 * 60, TimeUnit.MINUTES)
                             .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 10, TimeUnit.MINUTES)
                             .build();
 
             WorkManager.getInstance(this)
-                    .enqueueUniquePeriodicWork("CampusDualCalendarSync", ExistingPeriodicWorkPolicy.KEEP, myWork);
+                    .enqueueUniquePeriodicWork("CampusDualCalendarSync", ExistingPeriodicWorkPolicy.REPLACE, myWork);
 
             WorkManager.getInstance(this).getWorkInfosForUniqueWorkLiveData("CampusDualCalendarSync")
                     .observe(this, new Observer<List<WorkInfo>>() {
@@ -51,20 +53,12 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onChanged(List<WorkInfo> workInfos) {
                             if (!workInfos.isEmpty() && workInfos.get(0) != null) {
-                                String msg = "Aktualisierungsauftrag ist in einem fehlerhaften Status: " + workInfos.get(0).getState().toString();
-                                if (workInfos.get(0).getState() == WorkInfo.State.ENQUEUED) {
-                                    if (lastState != WorkInfo.State.RUNNING) {
-                                        msg = "Aktualisierungsauftrag ist im System hinterlegt";
-                                    } else {
-                                        msg = "Aktualisierung abgeschlossen";
-                                    }
+                                if (workInfos.get(0).getState() == WorkInfo.State.ENQUEUED && lastState == WorkInfo.State.RUNNING) {
+                                    Toast.makeText(getBaseContext(), getString(R.string.workmsg_finished), Toast.LENGTH_LONG).show();
                                 } else if (workInfos.get(0).getState() == WorkInfo.State.RUNNING) {
-                                    msg = "Aktualisierung wird gestartet... Dies kann bis zu 30 Sekunden dauern";
-                                } else if (workInfos.get(0).getState() == WorkInfo.State.FAILED) {
-                                    msg = "Aktualisierung war fehlerhaft und wird später wiederholt";
+                                    Toast.makeText(getBaseContext(), getString(R.string.workmsg_running), Toast.LENGTH_LONG).show();
                                 }
                                 lastState = workInfos.get(0).getState();
-                                Toast.makeText(getBaseContext(), msg, Toast.LENGTH_LONG).show();
                             }
                         }
                     });

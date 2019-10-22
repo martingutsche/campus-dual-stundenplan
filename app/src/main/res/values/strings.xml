@@ -18,4 +18,6 @@
         Campus Dual Stundenplan hält deinen Stundenplan ab jetzt aktuell. Um deine nächste Stunde direkt auf dem Homescreen zu sehen kannst du das Google Kalender Widget nutzen.\n\n\n
         Sollten deine Module in 5 Minuten noch nicht in deinem Kalender zu sehen sein, aktualisiere diesen bitte oder wechsle zum Google Kalender.
     </string>
+    <string name="workmsg_running">Aktualisierung wird durchgeführt…</string>
+    <string name="workmsg_finished">Aktualisierung abgeschlossen</string>
 </resources>
