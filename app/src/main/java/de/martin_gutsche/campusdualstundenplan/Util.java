@@ -2,10 +2,6 @@ package de.martin_gutsche.campusdualstundenplan;
 
 import android.content.Context;
 
-import com.google.api.client.util.DateTime;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -17,18 +13,10 @@ import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
 
 class Util {
-    /////////////////////////
-    // CALENDAR OPERATIONS //
-    /////////////////////////
-    private static final SimpleDateFormat cdDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.GERMAN);
     /////////////////////
     // FILE OPERATIONS //
     /////////////////////
@@ -126,85 +114,6 @@ class Util {
         }
     }
 
-    static Event convertEventToGoogle(JSONObject cdEvent) throws JSONException, ParseException {
-        cdDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-
-        /// TITLE ///
-        String title;
-        String cdInst = cdEvent.getString("instructor");
-        String cdSinst = cdEvent.getString("sinstructor");
-        String cdTitle = cdEvent.getString("title");
-        if (cdTitle.contains("-")) {
-            title = cdTitle.split("-", 2)[1];
-        } else {
-            title = cdTitle;
-        }
-        if (!cdInst.equals("") || !cdSinst.equals("")) {
-            if (cdSinst.equals("") || cdInst.equals(cdSinst)) {
-                title += " (" + cdInst + ")";
-            } else {
-                title += " (" + cdInst + ", " + cdSinst + ")";
-            }
-        }
-
-        ///  ROOM  ///
-        String room;
-        String cdRoom = cdEvent.getString("room");
-        String cdSroom = cdEvent.getString("sroom");
-        if (cdSroom.equals("") || cdRoom.equals(cdSroom)) {
-            room = cdRoom;
-        } else {
-            room = cdRoom + " (" + cdSroom + ")";
-        }
-
-        ///  DESC  ///
-        StringBuilder desc = new StringBuilder();
-        String cdDesc = cdEvent.getString("description");
-        String cdRemarks = cdEvent.getString("remarks");
-        //add description and remarks
-        if (cdDesc.equals(cdRemarks)) {
-            desc.append(cdDesc);
-        } else {
-            if (!cdDesc.equals("") && !cdRemarks.equals("")) {
-                desc.append(cdDesc);
-                desc.append("; ");
-                desc.append(cdRemarks);
-            } else {
-                //ele is only reached when cdDesk or cd cdRemarks is empty (non-exclusive)
-                desc.append(cdDesc);
-                desc.append(cdRemarks);
-            }
-        }
-
-        ///  START & END  ///
-        String startTime = cdEvent.getString("start");
-        DateTime startDateTime = new DateTime(cdDateFormat.parse(startTime));
-        EventDateTime start = new EventDateTime()
-                .setDateTime(startDateTime)
-                .setTimeZone("Europe/Berlin");
-
-        String endTime = cdEvent.getString("end");
-        DateTime endDateTime = new DateTime(cdDateFormat.parse(endTime));
-        EventDateTime end = new EventDateTime()
-                .setDateTime(endDateTime)
-                .setTimeZone("Europe/Berlin");
-
-
-        System.out.println(cdDateFormat.parse(endTime));
-        System.out.println(endTime);
-        System.out.println(end);
-        System.out.println();
-
-
-        ///  CREATE THE ACTUAL EVENT  ///
-        return new Event()
-                .setSummary(title)
-                .setLocation(room)
-                .setDescription(desc.toString())
-                .setStart(start)
-                .setEnd(end)
-                .setColorId("8");
-    }
 
     static String HttpGet(String urlString, String[][] params) throws IOException {
         //convert params from HashMap to String formatted to be used in a request
