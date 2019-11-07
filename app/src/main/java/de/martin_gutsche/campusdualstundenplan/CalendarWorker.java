@@ -21,7 +21,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
 import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventDateTime;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -34,7 +33,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.TimeZone;
+
+import static de.martin_gutsche.campusdualstundenplan.Util.convertEventToGoogle;
 
 public class CalendarWorker extends Worker {
     private static final GenericUrl BATCH_URL = new GenericUrl("https://www.googleapis.com/batch/calendar/v3");
@@ -42,93 +42,12 @@ public class CalendarWorker extends Worker {
     private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
     private static final SimpleDateFormat cdDateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.GERMAN);
 
-
     private Calendar service;
     private String calendarId;
 
 
     public CalendarWorker(Context context, WorkerParameters params) {
         super(context, params);
-    }
-
-    private static Event convertEventToGoogle(JSONObject cdEvent) throws JSONException, ParseException {
-        cdDateFormat.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
-
-        /// TITLE ///
-        String title;
-        String cdInst = cdEvent.getString("instructor");
-        String cdSinst = cdEvent.getString("sinstructor");
-        String cdTitle = cdEvent.getString("title");
-        if (cdTitle.contains("-")) {
-            title = cdTitle.split("-", 2)[1];
-        } else {
-            title = cdTitle;
-        }
-        if (!cdInst.equals("") || !cdSinst.equals("")) {
-            if (cdSinst.equals("") || cdInst.equals(cdSinst)) {
-                title += " (" + cdInst + ")";
-            } else {
-                title += " (" + cdInst + ", " + cdSinst + ")";
-            }
-        }
-
-        ///  ROOM  ///
-        String room;
-        String cdRoom = cdEvent.getString("room");
-        String cdSroom = cdEvent.getString("sroom");
-        if (cdSroom.equals("") || cdRoom.equals(cdSroom)) {
-            room = cdRoom;
-        } else {
-            room = cdRoom + " (" + cdSroom + ")";
-        }
-
-        ///  DESC  ///
-        StringBuilder desc = new StringBuilder();
-        String cdDesc = cdEvent.getString("description");
-        String cdRemarks = cdEvent.getString("remarks");
-        //add description and remarks
-        if (cdDesc.equals(cdRemarks)) {
-            desc.append(cdDesc);
-        } else {
-            if (!cdDesc.equals("") && !cdRemarks.equals("")) {
-                desc.append(cdDesc);
-                desc.append("; ");
-                desc.append(cdRemarks);
-            } else {
-                //ele is only reached when cdDesk or cd cdRemarks is empty (non-exclusive)
-                desc.append(cdDesc);
-                desc.append(cdRemarks);
-            }
-        }
-
-        ///  START & END  ///
-        String startTime = cdEvent.getString("start");
-        DateTime startDateTime = new DateTime(cdDateFormat.parse(startTime));
-        EventDateTime start = new EventDateTime()
-                .setDateTime(startDateTime)
-                .setTimeZone("Europe/Berlin");
-
-        String endTime = cdEvent.getString("end");
-        DateTime endDateTime = new DateTime(cdDateFormat.parse(endTime));
-        EventDateTime end = new EventDateTime()
-                .setDateTime(endDateTime)
-                .setTimeZone("Europe/Berlin");
-
-
-        System.out.println(cdDateFormat.parse(endTime));
-        System.out.println(endTime);
-        System.out.println(end);
-        System.out.println();
-
-
-        ///  CREATE THE ACTUAL EVENT  ///
-        return new Event()
-                .setSummary(title)
-                .setLocation(room)
-                .setDescription(desc.toString())
-                .setStart(start)
-                .setEnd(end)
-                .setColorId("8");
     }
 
     @NonNull
