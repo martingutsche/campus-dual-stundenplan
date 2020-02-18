@@ -8,7 +8,10 @@
     <string name="login_name">Matrikelnummer</string>
     <string name="login_password">Passwort</string>
     <string name="login_btn">Login</string>
-    <string name="login_hint">Einmal einloggen und deinen Stundenplan immer dabei haben</string>
+    <string name="login_hint">
+        Login mit den Anmeldedaten von Campus Dual \n
+        Noch nicht bei Campus Dual? <a href="https://selfservice.campus-dual.de/index/register">Jetzt Registrieren</a>
+    </string>
     <string name="error_empty_password">Bitte Passwort eingeben</string>
     <string name="error_empty_matrikelnummer">Bitte Matrikelnummer eingeben</string>
     <string name="login_failed">Login fehlgeschalgen…</string>
@@ -20,4 +23,5 @@
     </string>
     <string name="workmsg_running">Aktualisierung wird durchgeführt…</string>
     <string name="workmsg_finished">Aktualisierung abgeschlossen</string>
+    <string name="ic_splash_content_description">Campus Dual Stundenplan Logo</string>
 </resources>
